@@ -74,7 +74,9 @@ public class QuizRvAdapter extends RecyclerView.Adapter<QuizRvAdapter.ViewHolder
         holder.createdAt.setText(mProblemList.get(lPosition).getCreatedAt());
         if(mProblemList.get(lPosition).getReply() == null){
             holder.quizReply.setText("暂未回复");
+            holder.replyTime.setVisibility(View.GONE);
         }else {
+            holder.replyTime.setVisibility(View.VISIBLE);
             holder.quizReply.setText(mProblemList.get(lPosition).getReply());
             holder.replyTime.setText(mProblemList.get(lPosition).getUpdatedAt());
         }

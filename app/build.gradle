@@ -13,6 +13,7 @@ android {
         multiDexEnabled true
 
         ndk{
+            abiFilters "armeabi-v7a"
             abiFilters "x86"
         }
 
@@ -37,7 +38,7 @@ dependencies {
     implementation 'es.voghdev.pdfviewpager:library:1.0.4'
     api 'com.github.barteksc:android-pdf-viewer:2.8.2'
     compile 'com.github.bumptech.glide:glide:4.0.0'
-    //implementation 'com.squareup.okhttp:okhttp:2.5.0'
+
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     testImplementation 'junit:junit:4.12'

@@ -23,6 +23,7 @@ import com.example.a11059.mlearning.utils.UtilNetwork;
 import com.qmuiteam.qmui.util.QMUIStatusBarHelper;
 import com.qmuiteam.qmui.widget.QMUIEmptyView;
 import com.qmuiteam.qmui.widget.QMUITopBar;
+import com.qmuiteam.qmui.widget.dialog.QMUIBottomSheet;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -162,7 +163,38 @@ public class ResourceActivity extends AppCompatActivity implements View.OnClickL
         switch (v.getId()){
             case R.id.qmui_topbar_item_left_back:
                 finish();
+            case R.drawable.submit_exam:
+                showResourceTypes();
+                break;
         }
+    }
+
+    private void showResourceTypes(){
+        new QMUIBottomSheet.BottomListSheetBuilder(this)
+                .addItem("All")
+                .addItem("PDF")
+                .addItem("VIDEO")
+                .setOnSheetItemClickListener(new QMUIBottomSheet.BottomListSheetBuilder.OnSheetItemClickListener() {
+                    @Override
+                    public void onClick(QMUIBottomSheet dialog, View itemView, int position, String tag) {
+                        dialog.dismiss();
+                        String type = "";
+                        switch (position){
+                            case 0:
+                                UtilDatabase.findAllResources(ResourceActivity.this, currentUnitId, currentKnowledgeId);
+                                break;
+                            case 1:
+                                type = "pdf";
+                                break;
+                            case 2:
+                                type = "video";
+                                break;
+                        }
+                        UtilDatabase.findResourceByType(ResourceActivity.this, currentUnitId, currentKnowledgeId, type);
+                    }
+                })
+        .build()
+        .show();
     }
 
     private void showEmptyViewTip(){

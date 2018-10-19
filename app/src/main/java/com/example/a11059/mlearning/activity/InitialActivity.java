@@ -55,12 +55,14 @@ public class InitialActivity extends AppCompatActivity implements View.OnClickLi
     private QMUILinearLayout initial_window;
 
     private EditText nickname, password, cPassword, mobileNumber, email;
-    private TextView classInfo, courseInfo;
+    private TextView classInfo, courseInfo, c;
 
     private String userNickName, userPwd, userMobilPhone, userAddress, userClassId, userCourseId;
 
     private List<Class> classList = new ArrayList<>();
     private List<Course> courseList = new ArrayList<>();
+
+    private User user = new User();
 
     public static void actionStart(Context context){
         Intent intent = new Intent(context, InitialActivity.class);
@@ -113,6 +115,7 @@ public class InitialActivity extends AppCompatActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_initial);
         QMUIStatusBarHelper.translucent(this);
+        user = BmobUser.getCurrentUser(User.class);
         initWindow();
     }
 
@@ -152,10 +155,17 @@ public class InitialActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void initTextView(){
+        c = (TextView)findViewById(R.id.c_c);
         classInfo = (TextView) findViewById(R.id.classInfo);
         courseInfo = (TextView) findViewById(R.id.courseInfo);
-        classInfo.setOnClickListener(this);
-        courseInfo.setOnClickListener(this);
+        if(user.getIdentity().equals(IDENTITY_TEACHER) ){
+            c.setVisibility(View.GONE);
+            classInfo.setVisibility(View.GONE);
+            courseInfo.setVisibility(View.GONE);
+        }else {
+            classInfo.setOnClickListener(this);
+            courseInfo.setOnClickListener(this);
+        }
     }
 
     @Override
@@ -264,9 +274,6 @@ public class InitialActivity extends AppCompatActivity implements View.OnClickLi
         //String cPwd = cPassword.getText().toString();
         String mobilPhone = mobileNumber.getText().toString();
         String address = email.getText().toString();
-        final String classId = classInfo.getText().toString().split(" ")[0];
-        final String courseId = courseInfo.getText().toString().split(" ")[0];
-
         if (!UtilString.isNotBlankString(nickName)) {
             showTip(TIP_TYPE_FAIL, "学号不能为空", DEFAULT_TIP_DURATION);
             return;
@@ -290,24 +297,36 @@ public class InitialActivity extends AppCompatActivity implements View.OnClickLi
             showTip(TIP_TYPE_FAIL, "邮箱地址不能为空", DEFAULT_TIP_DURATION);
             return;
         }
-        if (!UtilString.isNotBlankString(classId)) {
-            showTip(TIP_TYPE_FAIL, "请选择班级", DEFAULT_TIP_DURATION);
-            return;
+        if(user.getIdentity().equals(IDENTITY_STUDENT)){
+            final String classId = classInfo.getText().toString().split(" ")[0];
+            final String courseId = courseInfo.getText().toString().split(" ")[0];
+            if (!UtilString.isNotBlankString(classId)) {
+                showTip(TIP_TYPE_FAIL, "请选择班级", DEFAULT_TIP_DURATION);
+                return;
+            }
+            if (!UtilString.isNotBlankString(courseId)) {
+                showTip(TIP_TYPE_FAIL, "请选择课程", DEFAULT_TIP_DURATION);
+                return;
+            }
+            showLoadingTip();
+            userNickName = nickName;
+            userPwd = pwd;
+            userMobilPhone = mobilPhone;
+            userAddress = address;
+            userClassId = classId;
+            userCourseId = courseId;
+            UtilDatabase.initFeedBack(InitialActivity.this, Integer.parseInt(courseId), classId, nickName);
+        }else {
+            showLoadingTip();
+            userNickName = nickName;
+            userPwd = pwd;
+            userMobilPhone = mobilPhone;
+            userAddress = address;
+            initialTeacherInfo(userNickName, userPwd, userMobilPhone, userAddress);
         }
-        if (!UtilString.isNotBlankString(courseId)) {
-            showTip(TIP_TYPE_FAIL, "请选择课程", DEFAULT_TIP_DURATION);
-            return;
-        }
-        showLoadingTip();
 
-        userNickName = nickName;
-        userPwd = pwd;
-        userMobilPhone = mobilPhone;
-        userAddress = address;
-        userClassId = classId;
-        userCourseId = courseId;
 
-        UtilDatabase.initFeedBack(InitialActivity.this, Integer.parseInt(courseId), classId, nickName);
+
     }
 
     private void initialUserInfo(String nickName, String pwd, String mobilPhone, String address, String classId, String courseId){
@@ -318,6 +337,26 @@ public class InitialActivity extends AppCompatActivity implements View.OnClickLi
         user.setEmail(address);
         user.setClassId(classId);
         user.setCourseId(Integer.parseInt(courseId));
+        user.setFirstTime(1);
+        user.update(new UpdateListener() {
+            @Override
+            public void done(BmobException e) {
+                if(e == null){
+                    showSubmitSuccDialog();
+                }
+                else{
+                    showSubmitFailTip();
+                }
+            }
+        });
+    }
+
+    private void initialTeacherInfo(String nickName, String pwd, String mobilPhone, String address){
+        User user = BmobUser.getCurrentUser(User.class);
+        user.setNickname(nickName);
+        user.setPassword(pwd);
+        user.setMobilePhoneNumber(mobilPhone);
+        user.setEmail(address);
         user.setFirstTime(1);
         user.update(new UpdateListener() {
             @Override

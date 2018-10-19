@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.a11059.mlearning.fragment.HomeFragment;
+import com.example.a11059.mlearning.fragment.MineFragment;
 import com.example.a11059.mlearning.fragment.StatisticFragment;
 import com.example.a11059.mlearning.fragment.TeacherMineFragment;
 import com.qmuiteam.qmui.widget.QMUIPagerAdapter;
@@ -33,7 +34,7 @@ public class TeacherMainPagerAdapter extends QMUIPagerAdapter {
             case 1:
                 return new HomeFragment();
             case 2:
-                return new TeacherMineFragment();
+                return new MineFragment();
         }
     }
 
